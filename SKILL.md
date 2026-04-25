@@ -79,8 +79,9 @@ enabled). Before calling it, call
 Bitcoin app is open — switch to Solana" instead of a generic
 "open the Solana app" hint.
 
-Recommended: Helius RPC for reliability.
+Recommended: Helius RPC for reliability. Two ways to obtain a key:
 
+**Path A — dashboard (free tier, manual, ~30 seconds)**
 1. If `rpc.solana.source === "public-fallback"`, tell them: "Solana sends
    and fast portfolio reads work better with a free Helius key. Takes ~30
    seconds. Want me to walk you through?". If yes:
@@ -90,6 +91,35 @@ Recommended: Helius RPC for reliability.
    (`SOLANA_RPC_URL=<url> npx vaultpilot-mcp-setup --save`).
 4. Re-call `get_vaultpilot_config_status` and confirm `rpc.solana.source`
    is no longer `public-fallback`.
+
+**Path B — `helius-cli` (agent-native, paid, ~1 USDC)**
+
+Helius ships an official CLI built specifically for AI-agent signup. If
+the user wants the fully automated path AND is fine paying the one-time
+signup fee, offer this instead of Path A. **Disclose the cost upfront.**
+
+1. Verify `helius` is on PATH — run `which helius` via Bash. If missing,
+   offer: "I can install the Helius CLI globally with
+   `npm install -g helius-cli` — continue?" Only install on explicit yes.
+2. Generate a signup keypair: `helius keygen`. This prints the public
+   address to fund and stores the keypair at the path Helius expects.
+3. **Tell the user the exact cost**: *"The Helius CLI signup costs 1 USDC
+   + ~0.001 SOL for tx fees. You fund the generated address yourself —
+   I won't auto-send anything. After funding, we run `helius signup`."*
+4. Wait for the user to confirm they've funded the address. Do NOT skip
+   this step — running `helius signup` against an unfunded keypair is a
+   wasted command.
+5. Run `helius signup --json` via Bash. Parse the JSON output; it
+   contains an `apiKey` field.
+6. Save the resulting URL
+   `https://mainnet.helius-rpc.com/?api-key=<apiKey>` via the wizard
+   (`SOLANA_RPC_URL=<url> npx vaultpilot-mcp-setup --save`), then
+   re-probe `get_vaultpilot_config_status`.
+7. The signup includes 1,000,000 credits; further top-ups are via the
+   Helius dashboard after this first paid signup.
+
+If the user is unsure, default to Path A. Don't upsell Path B — the free
+tier is sufficient for personal portfolio + occasional signing use.
 
 The first Solana send auto-bundles a one-time nonce setup (~0.00144 SOL).
 They do NOT need to run `prepare_solana_nonce_init` first.
@@ -178,14 +208,22 @@ setup flow completes (don't block on it):
 Exact URLs per provider (avoid dashboard landing pages; go straight to
 new-key forms):
 
-| Provider | Deep link |
-|---|---|
-| Reown / WalletConnect | `https://cloud.reown.com/app/new-project` |
-| Helius | `https://dashboard.helius.dev/api-keys` |
-| TronGrid | `https://www.trongrid.io/dashboard/apikeys` |
-| Etherscan (V2, multichain) | `https://etherscan.io/myapikey` |
-| Infura | `https://app.infura.io/register` |
-| Alchemy | `https://dashboard.alchemy.com/apps/new` |
+| Provider | Deep link | CLI alternative |
+|---|---|---|
+| Reown / WalletConnect | `https://cloud.reown.com/app/new-project` | — |
+| Helius | `https://dashboard.helius.dev/api-keys` | `helius-cli` (paid, ~1 USDC; see Path B in section 3b) |
+| TronGrid | `https://www.trongrid.io/dashboard/apikeys` | — |
+| Etherscan (V2, multichain) | `https://etherscan.io/myapikey` | — |
+| Infura | `https://app.infura.io/register` | — |
+| Alchemy | `https://dashboard.alchemy.com/apps/new` | — |
 
 Etherscan / Infura / Alchemy are all **optional** and should be deferred
 until a tool actually needs them. Don't collect them preemptively.
+
+**No-OAuth finding (2026-04-25):** investigated whether any of these
+providers expose an OAuth / localhost-callback key issuance flow so we
+could do true "one-click key procurement". None do, as of this date —
+Helius's documented agent path is `helius-cli` (paid signup above);
+every other provider requires dashboard signup + copy-paste. The MCP
+docs were corrected; this skill's Path B + deep links are the honest
+state of what's possible.

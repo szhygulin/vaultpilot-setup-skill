@@ -181,7 +181,7 @@ setup flow completes (don't block on it):
 > signing. Install with:
 >
 > ```
-> git clone https://github.com/szhygulin/vaultpilot-skill.git \
+> git clone https://github.com/szhygulin/vaultpilot-security-skill.git \
 >   ~/.claude/skills/vaultpilot-preflight
 > ```
 >
@@ -191,8 +191,8 @@ setup flow completes (don't block on it):
 ## Anti-patterns — things NOT to do
 
 - Do NOT ask the user to edit `claude_desktop_config.json` / `mcp.json` /
-  `.claude.json` directly. The server's installer auto-registered itself
-  (PR #147). If they claim it didn't, re-run the installer — don't
+  `.claude.json` directly. The server's installer registers itself.
+  If they claim it didn't, re-run the installer — don't
   improvise JSON surgery.
 - Do NOT ask for every API key upfront. Ask for the minimum for their
   use case and let them add more later when a tool prompts for it.
@@ -220,10 +220,6 @@ new-key forms):
 Etherscan / Infura / Alchemy are all **optional** and should be deferred
 until a tool actually needs them. Don't collect them preemptively.
 
-**No-OAuth finding (2026-04-25):** investigated whether any of these
-providers expose an OAuth / localhost-callback key issuance flow so we
-could do true "one-click key procurement". None do, as of this date —
-Helius's documented agent path is `helius-cli` (paid signup above);
-every other provider requires dashboard signup + copy-paste. The MCP
-docs were corrected; this skill's Path B + deep links are the honest
-state of what's possible.
+None of these providers offers an OAuth or localhost-callback key flow.
+Helius's agent path is `helius-cli` (paid signup above); every other
+provider needs dashboard signup and copy-paste.
